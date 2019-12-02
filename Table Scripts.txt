@@ -1,0 +1,160 @@
+create table tUsers 
+(
+  user_id int NOT NULL, 
+  first_name varchar2(50) NOT NULL,
+  middle_name varchar2(50),
+  last_name varchar(50) NOT NULL,
+  phone_number number(15) NOT NULL,
+  email varchar2(50) NOT NULL,
+  landmark varchar2(70) NOT NULL,
+  locality varchar2(70) NOT NULL,
+  pincode number(8) NOT NULL,
+  district varchar2(30) NOT NULL,
+  state varchar2(30) NOT NULL,
+  account_number number(20) NOT NULL,
+  ifsc_code varchar2(30) NOT NULL,
+  aadhar_card varchar2(150) NOT NULL,
+  pan_card varchar2(150) NOT NULL,
+  certificate varchar2(150) NOT NULL,
+  password varchar2(30) NOT NULL,
+  role varchar2(30) NOT NULL,
+  status varchar(30) NOT NULL,
+  CONSTRAINT PK_tUsers PRIMARY KEY(user_id),
+  CONSTRAINT UQ_tUsers_email UNIQUE (email),
+  CONSTRAINT UQ_tUsers_account_number UNIQUE (account_number)
+)
+create sequence tUsers_seq
+
+
+create table tCrops(
+  crop_id int NOT NULL,
+  crop_name varchar2(15) NOT NULL,
+  crop_type varchar2(15) NOT NULL,
+  msp number(20,2) NOT NULL,
+  duration int NOT NULL,
+ CONSTRAINT PK_tCrops PRIMARY KEY(crop_id)
+)
+
+
+create table tLands 
+(
+  land_id int NOT NULL, 
+  user_id int NOT NULL, 
+  land_area number(10,2) NOT NULL,
+  land_address varchar2(100) NOT NULL,
+  land_pincode number(8) NOT NULL,
+ CONSTRAINT PK_tLands PRIMARY KEY(land_id ),
+ CONSTRAINT FK_tLands_tUsers
+    FOREIGN KEY (user_id )
+    REFERENCES tUsers(user_id ) ON DELETE CASCADE
+)
+create sequence tLands_seq start with 100
+
+
+create table tSellRequests
+(
+  request_id int NOT NULL,
+  fertilizer_type varchar2(50) NOT NULL,
+  quantity number(10,2) NOT NULL,
+  ph_certificate varchar2(150) NOT NULL,
+  base_price number(10,2) NOT NULL,
+  user_id int NOT NULL,
+  crop_id int NOT NULL,
+  status varchar2(15) NOT NULL,
+  request_date varchar2(50) NOT NULL,
+  current_bid number(10) NOT NULL,
+
+CONSTRAINT PK_tSellRequests PRIMARY KEY(request_id),
+ CONSTRAINT FK_tSellRequests_tUsers
+    FOREIGN KEY (user_id)
+    REFERENCES tUsers(user_id) ON DELETE CASCADE,
+CONSTRAINT FK_tRequests_tCrops
+    FOREIGN KEY (crop_id )
+    REFERENCES tCrops(crop_id) ON DELETE CASCADE
+)
+create sequence tSellRequests_seq start with 200
+
+
+
+
+
+create table tBidRequests
+(
+  bid_request_id int NOT NULL,
+  request_id int NOT NULL,
+  user_id int NOT NULL,
+  bid_amount number(10) NOT NULL,
+  bid_date varchar2(50) NOT NULL,
+
+ CONSTRAINT PK_tBidReq PRIMARY KEY(bid_request_id),
+ CONSTRAINT FK_tBidReq_tUsers
+    FOREIGN KEY (user_id)
+    REFERENCES tUsers(user_id),
+ CONSTRAINT FK_tBidReq_tSellReq
+    FOREIGN KEY (request_id)
+    REFERENCES tSellRequests(request_id)
+)
+
+create sequence tBidRequests_seq start with 1000
+
+
+
+
+
+
+
+
+create table tSoldHistory
+(
+  sold_history_id int,
+  sold_crop_date varchar2(50) NOT NULL,
+  user_id int NOT NULL,
+  request_id int NOT NULL,
+  bid_request_id int NOT NULL,
+  sold_amount number(10) NOT NULL,
+
+ CONSTRAINT PK_tSoldHistory PRIMARY KEY(sold_history_id),
+
+CONSTRAINT FK_tSoldHistory_tUsers
+    FOREIGN KEY (user_id)
+    REFERENCES tUsers(user_id) ON DELETE CASCADE,
+ CONSTRAINT FK_tSoldHistory_tSellReq
+    FOREIGN KEY (request_id)
+    REFERENCES tSellRequests(request_id) ON DELETE CASCADE,
+CONSTRAINT FK_tSoldHis_tBidReq
+    FOREIGN KEY (bid_request_id)
+    REFERENCES tBidRequests(bid_request_id) ON DELETE CASCADE
+)
+create sequence tSoldHistory_seq start with 300
+
+
+
+create table tInsuranceApplied
+(
+  policy_no number(20,2) NOT NULL,
+  crop_name varchar2(50) NOT NULL,
+ user_id int NOT NULL,
+  company_name varchar2(50) NOT NULL,
+  c_year varchar2(50) NOT NULL,
+  status varchar2(30) NOT NULL,
+  applied_date varchar2(50) NOT NULL,
+  total_sum_insured number(10),
+   CONSTRAINT PK_tInsuranceApplied PRIMARY KEY(policy_no),
+ CONSTRAINT FK_tInsuranceApp_tUsers
+    FOREIGN KEY (user_id )
+    REFERENCES tUsers(user_id ) ON DELETE CASCADE
+)
+create sequence tInsuranceApplied_seq start with 600
+
+create table tInsuranceClaimes(
+insurance_claim_id int NOT NULL,
+policy_no number(20,2) NOT NULL,
+  date_of_loss varchar2(50) NOT NULL,
+  cause_of_loss varchar2(200) NOT NULL,
+  status varchar2(30) NOT NULL,
+CONSTRAINT PK_tInsuranceClaimes PRIMARY KEY(insurance_claim_id),
+CONSTRAINT FK_tInsClaim_tblInsApp
+    FOREIGN KEY (policy_no)
+    REFERENCES tInsuranceApplied(policy_no) ON DELETE CASCADE
+)
+create sequence tInsuranceClaimes_seq start with 800
